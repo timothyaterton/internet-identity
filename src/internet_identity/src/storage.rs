@@ -130,6 +130,7 @@ use storable::discrepancy_counter::{DiscrepancyType, StorableDiscrepancyCounter}
 use storable::fixed_anchor::StorableFixedAnchor;
 use storable::openid_credential::StorableOpenIdCredential;
 use storable::openid_credential_key::StorableOpenIdCredentialKey;
+use storable::smtp::{StorableEmail, StorableEmailAddress, StorableEmailList};
 use storable::storable_persistent_state::StorablePersistentState;
 
 pub mod anchor;
@@ -178,6 +179,7 @@ const LOOKUP_APPLICATION_WITH_ORIGIN_MEMORY_INDEX: u8 = 19u8;
 const STABLE_ANCHOR_APPLICATION_CONFIG_MEMORY_INDEX: u8 = 20u8;
 const LOOKUP_ANCHOR_WITH_RECOVERY_PHRASE_PRINCIPAL_MEMORY_INDEX: u8 = 21u8;
 const LOOKUP_ANCHOR_WITH_PASSKEY_PUBKEY_HASH_MEMORY_INDEX: u8 = 22u8;
+const SMTP_POSTBOX_MEMORY_INDEX: u8 = 23u8;
 
 const ANCHOR_MEMORY_ID: MemoryId = MemoryId::new(ANCHOR_MEMORY_INDEX);
 const ARCHIVE_BUFFER_MEMORY_ID: MemoryId = MemoryId::new(ARCHIVE_BUFFER_MEMORY_INDEX);
@@ -214,6 +216,8 @@ const LOOKUP_ANCHOR_WITH_RECOVERY_PHRASE_PRINCIPAL_MEMORY_ID: MemoryId =
 
 const LOOKUP_ANCHOR_WITH_PASSKEY_PUBKEY_HASH_MEMORY_ID: MemoryId =
     MemoryId::new(LOOKUP_ANCHOR_WITH_PASSKEY_PUBKEY_HASH_MEMORY_INDEX);
+
+const SMTP_POSTBOX_MEMORY_ID: MemoryId = MemoryId::new(SMTP_POSTBOX_MEMORY_INDEX);
 
 // The bucket size 128 is relatively low, to avoid wasting memory when using
 // multiple virtual memories for smaller amounts of data.
@@ -327,6 +331,9 @@ pub struct Storage<M: Memory> {
     lookup_anchor_with_passkey_pubkey_hash_memory_wrapper: MemoryWrapper<ManagedMemory<M>>,
     pub(crate) lookup_anchor_with_passkey_pubkey_hash_memory:
         StableBTreeMap<Principal, StorableAnchorNumber, ManagedMemory<M>>,
+
+    smtp_postbox_memory_wrapper: MemoryWrapper<ManagedMemory<M>>,
+    smtp_postbox: StableBTreeMap<StorableEmailAddress, StorableEmailList, ManagedMemory<M>>,
 }
 
 #[repr(C, packed)]
@@ -410,6 +417,7 @@ impl<M: Memory + Clone> Storage<M> {
             memory_manager.get(LOOKUP_ANCHOR_WITH_RECOVERY_PHRASE_PRINCIPAL_MEMORY_ID);
         let lookup_anchor_with_passkey_pubkey_hash_memory =
             memory_manager.get(LOOKUP_ANCHOR_WITH_PASSKEY_PUBKEY_HASH_MEMORY_ID);
+        let smtp_postbox_memory = memory_manager.get(SMTP_POSTBOX_MEMORY_ID);
 
         let registration_rates = RegistrationRates::new(
             MinHeap::init(registration_ref_rate_memory.clone())
@@ -510,6 +518,8 @@ impl<M: Memory + Clone> Storage<M> {
             lookup_anchor_with_passkey_pubkey_hash_memory: StableBTreeMap::init(
                 lookup_anchor_with_passkey_pubkey_hash_memory,
             ),
+            smtp_postbox_memory_wrapper: MemoryWrapper::new(smtp_postbox_memory.clone()),
+            smtp_postbox: StableBTreeMap::init(smtp_postbox_memory),
         }
     }
 
@@ -1829,6 +1839,28 @@ impl<M: Memory + Clone> Storage<M> {
         self.header.version
     }
 
+    pub fn store_email(&mut self, recipient: String, email: StorableEmail) {
+        use internet_identity_interface::internet_identity::types::smtp::MAX_EMAILS_PER_USER;
+
+        let key = StorableEmailAddress(recipient);
+        let mut list = self
+            .smtp_postbox
+            .get(&key)
+            .unwrap_or(StorableEmailList {
+                emails: Vec::new(),
+            });
+
+        list.emails.push(email);
+
+        // Keep only the most recent emails
+        if list.emails.len() > MAX_EMAILS_PER_USER {
+            let start = list.emails.len() - MAX_EMAILS_PER_USER;
+            list.emails = list.emails.split_off(start);
+        }
+
+        self.smtp_postbox.insert(key, list);
+    }
+
     pub fn memory_sizes(&self) -> HashMap<String, u64> {
         HashMap::from_iter(vec![
             ("header".to_string(), self.header_memory.size()),
@@ -1904,6 +1936,10 @@ impl<M: Memory + Clone> Storage<M> {
                 "lookup_anchor_with_passkey_pubkey_hash_memory".to_string(),
                 self.lookup_anchor_with_passkey_pubkey_hash_memory_wrapper
                     .size(),
+            ),
+            (
+                "smtp_postbox".to_string(),
+                self.smtp_postbox_memory_wrapper.size(),
             ),
         ])
     }

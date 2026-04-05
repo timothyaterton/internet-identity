@@ -33,6 +33,7 @@ use internet_identity_interface::internet_identity::types::vc_mvp::{
     GetIdAliasError, GetIdAliasRequest, IdAliasCredentials, PrepareIdAliasError,
     PrepareIdAliasRequest, PreparedIdAlias,
 };
+use internet_identity_interface::internet_identity::types::smtp::{SmtpRequest, SmtpResponse};
 use internet_identity_interface::internet_identity::types::*;
 use serde_bytes::ByteBuf;
 use std::collections::HashMap;
@@ -53,6 +54,7 @@ mod http;
 mod ii_domain;
 
 mod openid;
+mod smtp;
 mod state;
 mod stats;
 mod storage;
@@ -1438,6 +1440,21 @@ mod attribute_sharing_old_vc {
             &req.rp_id_alias_jwt,
             &req.issuer_id_alias_jwt,
         )
+    }
+}
+
+mod smtp_gateway {
+    use super::*;
+    use internet_identity_interface::internet_identity::types::smtp::{SmtpRequest, SmtpResponse};
+
+    #[update]
+    fn smtp_request(request: SmtpRequest) -> SmtpResponse {
+        smtp::handle_smtp_request(request)
+    }
+
+    #[query]
+    fn smtp_request_validate(request: SmtpRequest) -> SmtpResponse {
+        smtp::handle_smtp_request_validate(request)
     }
 }
 
