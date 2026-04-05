@@ -13,7 +13,9 @@ pub const MAX_HEADER_VALUE_BYTES: usize = 8_192;
 pub const MAX_EMAILS_PER_USER: usize = 10;
 
 pub const ACCEPTED_DOMAIN: &str = "beta.id.ai";
-pub const ACCEPTED_USERS: &[&str] = &["arshavir", "thomas", "shiling", "igor", "ruediger", "bjoern"];
+pub const ACCEPTED_USERS: &[&str] = &[
+    "arshavir", "thomas", "shiling", "igor", "ruediger", "bjoern",
+];
 
 // --- SMTP error codes ---
 
@@ -92,17 +94,13 @@ fn validate_address_bounds(addr: &SmtpAddress, label: &str) -> Result<(), SmtpRe
     if addr.user.len() > MAX_EMAIL_USER_BYTES {
         return Err(smtp_err(
             SMTP_ERR_SYNTAX_ERROR,
-            format!(
-                "{label} user part exceeds {MAX_EMAIL_USER_BYTES} bytes"
-            ),
+            format!("{label} user part exceeds {MAX_EMAIL_USER_BYTES} bytes"),
         ));
     }
     if addr.domain.len() > MAX_EMAIL_DOMAIN_BYTES {
         return Err(smtp_err(
             SMTP_ERR_SYNTAX_ERROR,
-            format!(
-                "{label} domain exceeds {MAX_EMAIL_DOMAIN_BYTES} bytes"
-            ),
+            format!("{label} domain exceeds {MAX_EMAIL_DOMAIN_BYTES} bytes"),
         ));
     }
     Ok(())
@@ -121,7 +119,10 @@ fn validate_envelope(envelope: &SmtpEnvelope) -> Result<(), SmtpResponse> {
 
     let user_lower = envelope.to.user.to_lowercase();
     if !ACCEPTED_USERS.contains(&user_lower.as_str()) {
-        return Err(smtp_err(SMTP_ERR_MAILBOX_UNAVAILABLE, "Mailbox unavailable"));
+        return Err(smtp_err(
+            SMTP_ERR_MAILBOX_UNAVAILABLE,
+            "Mailbox unavailable",
+        ));
     }
 
     Ok(())
@@ -131,7 +132,10 @@ fn validate_message(message: &SmtpMessage) -> Result<(), SmtpResponse> {
     if message.headers.len() > MAX_HEADERS {
         return Err(smtp_err(
             SMTP_ERR_SYNTAX_ERROR,
-            format!("Too many headers: {} (max {MAX_HEADERS})", message.headers.len()),
+            format!(
+                "Too many headers: {} (max {MAX_HEADERS})",
+                message.headers.len()
+            ),
         ));
     }
 
@@ -139,9 +143,7 @@ fn validate_message(message: &SmtpMessage) -> Result<(), SmtpResponse> {
         if header.name.len() > MAX_HEADER_NAME_BYTES {
             return Err(smtp_err(
                 SMTP_ERR_SYNTAX_ERROR,
-                format!(
-                    "Header name exceeds {MAX_HEADER_NAME_BYTES} bytes"
-                ),
+                format!("Header name exceeds {MAX_HEADER_NAME_BYTES} bytes"),
             ));
         }
         if header.value.len() > MAX_HEADER_VALUE_BYTES {

@@ -1846,9 +1846,7 @@ impl<M: Memory + Clone> Storage<M> {
         let mut list = self
             .smtp_postbox
             .get(&key)
-            .unwrap_or(StorableEmailList {
-                emails: Vec::new(),
-            });
+            .unwrap_or(StorableEmailList { emails: Vec::new() });
 
         list.emails.push(email);
 

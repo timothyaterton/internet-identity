@@ -9,18 +9,19 @@ use std::borrow::Cow;
 
 /// Max serialized size of a single email address key.
 /// user (64) + "@" (1) + domain (255) + Candid overhead (~20 bytes).
-const STORABLE_EMAIL_ADDRESS_MAX_SIZE: u32 = (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES + 20) as u32;
+const STORABLE_EMAIL_ADDRESS_MAX_SIZE: u32 =
+    (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES + 20) as u32;
 
 /// Max serialized size of a single email.
 /// sender (320) + recipient (320) + subject (256) + body (5_000) + Candid overhead (~100 bytes).
-const STORABLE_EMAIL_MAX_SIZE: u32 =
-    (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES) as u32 * 2
+const STORABLE_EMAIL_MAX_SIZE: u32 = (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES) as u32 * 2
     + MAX_SUBJECT_BYTES as u32
     + MAX_BODY_BYTES as u32
     + 100;
 
 /// Max serialized size of the email list value.
-const STORABLE_EMAIL_LIST_MAX_SIZE: u32 = STORABLE_EMAIL_MAX_SIZE * MAX_EMAILS_PER_USER as u32 + 100;
+const STORABLE_EMAIL_LIST_MAX_SIZE: u32 =
+    STORABLE_EMAIL_MAX_SIZE * MAX_EMAILS_PER_USER as u32 + 100;
 
 #[derive(Clone, Debug, CandidType, Deserialize, Ord, PartialOrd, Eq, PartialEq)]
 pub struct StorableEmailAddress(pub String);
