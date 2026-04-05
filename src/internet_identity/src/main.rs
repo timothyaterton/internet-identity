@@ -29,13 +29,13 @@ use internet_identity_interface::internet_identity::types::openid::{
     OpenIdCredentialAddError, OpenIdCredentialRemoveError, OpenIdDelegationError,
     OpenIdPrepareDelegationResponse,
 };
+use internet_identity_interface::internet_identity::types::smtp::{
+    PostboxEmail, SmtpRequest, SmtpResponse,
+};
 use internet_identity_interface::internet_identity::types::smtp::{SmtpRequest, SmtpResponse};
 use internet_identity_interface::internet_identity::types::vc_mvp::{
     GetIdAliasError, GetIdAliasRequest, IdAliasCredentials, PrepareIdAliasError,
     PrepareIdAliasRequest, PreparedIdAlias,
-};
-use internet_identity_interface::internet_identity::types::smtp::{
-    PostboxEmail, SmtpRequest, SmtpResponse,
 };
 use internet_identity_interface::internet_identity::types::*;
 use serde_bytes::ByteBuf;
