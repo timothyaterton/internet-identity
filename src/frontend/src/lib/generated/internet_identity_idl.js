@@ -352,6 +352,21 @@ export const idlFactory = ({ IDL }) => {
     'no_such_delegation' : IDL.Null,
     'signed_delegation' : SignedDelegation,
   });
+  const GetIcrc3AttributeRequest = IDL.Record({
+    'origin' : FrontendHostname,
+    'account_number' : IDL.Opt(AccountNumber),
+    'message' : IDL.Vec(IDL.Nat8),
+    'identity_number' : IdentityNumber,
+  });
+  const GetIcrc3AttributeResponse = IDL.Record({
+    'signature' : IDL.Vec(IDL.Nat8),
+  });
+  const GetIcrc3AttributeError = IDL.Variant({
+    'AuthorizationError' : IDL.Principal,
+    'NoSuchSignature' : IDL.Null,
+    'ValidationError' : IDL.Record({ 'problems' : IDL.Vec(IDL.Text) }),
+    'GetAccountError' : GetAccountError,
+  });
   const GetIdAliasRequest = IDL.Record({
     'rp_id_alias_jwt' : IDL.Text,
     'issuer' : FrontendHostname,
@@ -372,6 +387,12 @@ export const idlFactory = ({ IDL }) => {
     'InternalCanisterError' : IDL.Text,
     'Unauthorized' : IDL.Principal,
     'NoSuchCredentials' : IDL.Text,
+  });
+  const PostboxEmail = IDL.Record({
+    'subject' : IDL.Text,
+    'body' : IDL.Text,
+    'recipient' : IDL.Text,
+    'sender' : IDL.Text,
   });
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const HttpRequest = IDL.Record({
@@ -442,6 +463,17 @@ export const idlFactory = ({ IDL }) => {
     'AlreadyInProgress' : IDL.Null,
     'RateLimitExceeded' : IDL.Null,
   });
+  const ListAvailableAttributesRequest = IDL.Record({
+    'attributes' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'identity_number' : IdentityNumber,
+  });
+  const ListAvailableAttributesResponse = IDL.Vec(
+    IDL.Tuple(IDL.Text, IDL.Vec(IDL.Nat8))
+  );
+  const ListAvailableAttributesError = IDL.Variant({
+    'AuthorizationError' : IDL.Principal,
+    'ValidationError' : IDL.Record({ 'problems' : IDL.Vec(IDL.Text) }),
+  });
   const DeviceKeyWithAnchor = IDL.Record({
     'pubkey' : DeviceKey,
     'anchor_number' : UserNumber,
@@ -497,6 +529,27 @@ export const idlFactory = ({ IDL }) => {
     'ValidationError' : IDL.Record({ 'problems' : IDL.Vec(IDL.Text) }),
     'GetAccountError' : GetAccountError,
   });
+  const AttributeSpec = IDL.Record({
+    'key' : IDL.Text,
+    'value' : IDL.Opt(IDL.Vec(IDL.Nat8)),
+    'omit_scope' : IDL.Bool,
+  });
+  const PrepareIcrc3AttributeRequest = IDL.Record({
+    'origin' : FrontendHostname,
+    'account_number' : IDL.Opt(AccountNumber),
+    'attributes' : IDL.Vec(AttributeSpec),
+    'nonce' : IDL.Vec(IDL.Nat8),
+    'identity_number' : IdentityNumber,
+  });
+  const PrepareIcrc3AttributeResponse = IDL.Record({
+    'message' : IDL.Vec(IDL.Nat8),
+  });
+  const PrepareIcrc3AttributeError = IDL.Variant({
+    'AuthorizationError' : IDL.Principal,
+    'ValidationError' : IDL.Record({ 'problems' : IDL.Vec(IDL.Text) }),
+    'GetAccountError' : GetAccountError,
+    'AttributeMismatch' : IDL.Record({ 'problems' : IDL.Vec(IDL.Text) }),
+  });
   const PrepareIdAliasRequest = IDL.Record({
     'issuer' : FrontendHostname,
     'relying_party' : FrontendHostname,
@@ -529,6 +582,26 @@ export const idlFactory = ({ IDL }) => {
       'origin' : FrontendHostname,
       'anchor_number' : UserNumber,
     }),
+  });
+  const SmtpAddress = IDL.Record({ 'domain' : IDL.Text, 'user' : IDL.Text });
+  const SmtpEnvelope = IDL.Record({ 'to' : SmtpAddress, 'from' : SmtpAddress });
+  const SmtpHeader = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const SmtpMessage = IDL.Record({
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(SmtpHeader),
+  });
+  const SmtpRequest = IDL.Record({
+    'envelope' : IDL.Opt(SmtpEnvelope),
+    'message' : IDL.Opt(SmtpMessage),
+    'gateway_flags' : IDL.Opt(IDL.Vec(IDL.Text)),
+  });
+  const SmtpRequestError = IDL.Record({
+    'code' : IDL.Nat64,
+    'message' : IDL.Text,
+  });
+  const SmtpResponse = IDL.Variant({
+    'Ok' : IDL.Record({}),
+    'Err' : SmtpRequestError,
   });
   const ArchiveInfo = IDL.Record({
     'archive_config' : IDL.Opt(ArchiveConfig),
@@ -728,11 +801,22 @@ export const idlFactory = ({ IDL }) => {
         [GetDelegationResponse],
         ['query'],
       ),
+    'get_icrc3_attributes' : IDL.Func(
+        [GetIcrc3AttributeRequest],
+        [
+          IDL.Variant({
+            'Ok' : GetIcrc3AttributeResponse,
+            'Err' : GetIcrc3AttributeError,
+          }),
+        ],
+        ['query'],
+      ),
     'get_id_alias' : IDL.Func(
         [GetIdAliasRequest],
         [IDL.Variant({ 'Ok' : IdAliasCredentials, 'Err' : GetIdAliasError })],
         ['query'],
       ),
+    'get_postbox' : IDL.Func([UserNumber], [IDL.Vec(PostboxEmail)], ['query']),
     'get_principal' : IDL.Func(
         [UserNumber, FrontendHostname],
         [IDL.Principal],
@@ -780,6 +864,16 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'init_salt' : IDL.Func([], [], []),
+    'list_available_attributes' : IDL.Func(
+        [ListAvailableAttributesRequest],
+        [
+          IDL.Variant({
+            'Ok' : ListAvailableAttributesResponse,
+            'Err' : ListAvailableAttributesError,
+          }),
+        ],
+        ['query'],
+      ),
     'lookup' : IDL.Func([UserNumber], [IDL.Vec(DeviceData)], ['query']),
     'lookup_by_registration_mode_id' : IDL.Func(
         [RegistrationId],
@@ -862,6 +956,16 @@ export const idlFactory = ({ IDL }) => {
         [UserKey, Timestamp],
         [],
       ),
+    'prepare_icrc3_attributes' : IDL.Func(
+        [PrepareIcrc3AttributeRequest],
+        [
+          IDL.Variant({
+            'Ok' : PrepareIcrc3AttributeResponse,
+            'Err' : PrepareIcrc3AttributeError,
+          }),
+        ],
+        [],
+      ),
     'prepare_id_alias' : IDL.Func(
         [PrepareIdAliasRequest],
         [IDL.Variant({ 'Ok' : PreparedIdAlias, 'Err' : PrepareIdAliasError })],
@@ -878,6 +982,12 @@ export const idlFactory = ({ IDL }) => {
         [UserNumber, FrontendHostname, IDL.Opt(AccountNumber)],
         [IDL.Variant({ 'Ok' : AccountInfo, 'Err' : SetDefaultAccountError })],
         [],
+      ),
+    'smtp_request' : IDL.Func([SmtpRequest], [SmtpResponse], []),
+    'smtp_request_validate' : IDL.Func(
+        [SmtpRequest],
+        [SmtpResponse],
+        ['query'],
       ),
     'stats' : IDL.Func([], [InternetIdentityStats], ['query']),
     'update' : IDL.Func([UserNumber, DeviceKey, DeviceData], [], []),

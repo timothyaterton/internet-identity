@@ -34,6 +34,9 @@ use internet_identity_interface::internet_identity::types::vc_mvp::{
     GetIdAliasError, GetIdAliasRequest, IdAliasCredentials, PrepareIdAliasError,
     PrepareIdAliasRequest, PreparedIdAlias,
 };
+use internet_identity_interface::internet_identity::types::smtp::{
+    PostboxEmail, SmtpRequest, SmtpResponse,
+};
 use internet_identity_interface::internet_identity::types::*;
 use serde_bytes::ByteBuf;
 use std::collections::HashMap;
@@ -1445,7 +1448,9 @@ mod attribute_sharing_old_vc {
 
 mod smtp_gateway {
     use super::*;
-    use internet_identity_interface::internet_identity::types::smtp::{SmtpRequest, SmtpResponse};
+    use internet_identity_interface::internet_identity::types::smtp::{
+        PostboxEmail, SmtpRequest, SmtpResponse,
+    };
 
     #[update]
     fn smtp_request(request: SmtpRequest) -> SmtpResponse {
@@ -1455,6 +1460,11 @@ mod smtp_gateway {
     #[query]
     fn smtp_request_validate(request: SmtpRequest) -> SmtpResponse {
         smtp::handle_smtp_request_validate(request)
+    }
+
+    #[query]
+    fn get_postbox(anchor_number: AnchorNumber) -> Vec<PostboxEmail> {
+        smtp::get_postbox(anchor_number)
     }
 }
 

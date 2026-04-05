@@ -12,10 +12,7 @@ pub const MAX_HEADER_NAME_BYTES: usize = 256;
 pub const MAX_HEADER_VALUE_BYTES: usize = 8_192;
 pub const MAX_EMAILS_PER_USER: usize = 10;
 
-pub const ACCEPTED_DOMAIN: &str = "beta.id.ai";
-pub const ACCEPTED_USERS: &[&str] = &[
-    "arshavir", "thomas", "shiling", "igor", "ruediger", "bjoern",
-];
+pub const ACCEPTED_DOMAIN: &str = "id.ai";
 
 // --- SMTP error codes ---
 
@@ -65,6 +62,16 @@ pub struct SmtpRequestError {
 pub enum SmtpResponse {
     Ok {},
     Err(SmtpRequestError),
+}
+
+// --- Postbox query types ---
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct PostboxEmail {
+    pub sender: String,
+    pub recipient: String,
+    pub subject: String,
+    pub body: String,
 }
 
 // --- Validated internal types ---
@@ -117,13 +124,12 @@ fn validate_envelope(envelope: &SmtpEnvelope) -> Result<(), SmtpResponse> {
         ));
     }
 
-    let user_lower = envelope.to.user.to_lowercase();
-    if !ACCEPTED_USERS.contains(&user_lower.as_str()) {
-        return Err(smtp_err(
+    envelope.to.user.parse::<u64>().map_err(|_| {
+        smtp_err(
             SMTP_ERR_MAILBOX_UNAVAILABLE,
-            "Mailbox unavailable",
-        ));
-    }
+            "Recipient user must be a valid anchor number",
+        )
+    })?;
 
     Ok(())
 }

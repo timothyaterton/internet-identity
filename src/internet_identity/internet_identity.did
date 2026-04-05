@@ -1072,6 +1072,13 @@ type SmtpResponse = variant {
     Err : SmtpRequestError;
 };
 
+type PostboxEmail = record {
+    sender : text;
+    recipient : text;
+    subject : text;
+    body : text;
+};
+
 service : (opt InternetIdentityInit) -> {
     // Legacy identity management API
     // ==============================
@@ -1282,4 +1289,5 @@ service : (opt InternetIdentityInit) -> {
     // =====================
     smtp_request : (SmtpRequest) -> (SmtpResponse);
     smtp_request_validate : (SmtpRequest) -> (SmtpResponse) query;
+    get_postbox : (anchor_number : UserNumber) -> (vec PostboxEmail) query;
 };

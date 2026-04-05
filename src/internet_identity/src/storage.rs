@@ -1839,6 +1839,14 @@ impl<M: Memory + Clone> Storage<M> {
         self.header.version
     }
 
+    pub fn get_emails(&self, recipient: &str) -> Vec<StorableEmail> {
+        let key = StorableEmailAddress(recipient.to_string());
+        self.smtp_postbox
+            .get(&key)
+            .map(|list| list.emails)
+            .unwrap_or_default()
+    }
+
     pub fn store_email(&mut self, recipient: String, email: StorableEmail) {
         use internet_identity_interface::internet_identity::types::smtp::MAX_EMAILS_PER_USER;
 
