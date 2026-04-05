@@ -38,9 +38,7 @@
             ]}
             onclick={() => (selectedIndex = i)}
           >
-            <span
-              class="text-text-primary truncate text-sm font-medium"
-            >
+            <span class="text-text-primary truncate text-sm font-medium">
               {email.subject || $t`(no subject)`}
             </span>
             <span class="text-text-tertiary truncate text-xs">
@@ -53,9 +51,7 @@
   </div>
 
   <!-- Email content -->
-  <div
-    class="bg-bg-secondary flex min-h-64 flex-1 flex-col rounded-xl p-6"
-  >
+  <div class="bg-bg-secondary flex min-h-64 flex-1 flex-col rounded-xl p-6">
     {#if selectedEmail}
       <div class="mb-4 flex flex-col gap-1">
         <h2 class="text-text-primary text-lg font-medium">
@@ -68,7 +64,7 @@
       </div>
       <div class="border-border-secondary border-t pt-4">
         <pre
-          class="text-text-secondary whitespace-pre-wrap break-words text-sm">{selectedEmail.body}</pre>
+          class="text-text-secondary text-sm break-words whitespace-pre-wrap">{selectedEmail.body}</pre>
       </div>
     {:else}
       <p class="text-text-tertiary text-sm">
