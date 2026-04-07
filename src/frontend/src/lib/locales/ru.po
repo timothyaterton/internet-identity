@@ -13,6 +13,9 @@ msgstr ""
 "Language-Team: Аршавир Тер-Габриелян\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+msgid "(no subject)"
+msgstr ""
+
 msgid "{0} logo"
 msgstr "{0} логотип"
 
@@ -277,6 +280,9 @@ msgstr "Редактировать {name}"
 msgid "Edit account"
 msgstr "Редактировать аккаунт"
 
+msgid "Emails received for your identity."
+msgstr ""
+
 msgid "Enable multiple accounts"
 msgstr "Включить несколько аккаунтов"
 
@@ -316,6 +322,12 @@ msgstr "Например, пользователь А входит в Internet I
 
 msgid "Forget about remembering complicated usernames and passwords. With passkeys, you simply pick your name to log in — quick, safe, and hassle-free."
 msgstr "Не нужно придумывать и запоминать логины и пароли. Используйте ключ доступа — это быстрее и безопаснее."
+
+msgid "From:"
+msgstr ""
+
+msgid "To:"
+msgstr ""
 
 msgid "Full control"
 msgstr "Полный контроль"
@@ -599,6 +611,9 @@ msgstr "Придумайте имя"
 msgid "No data is shared with Google, Microsoft or Apple on which applications you log in with Internet Identity."
 msgstr "Никакие данные о том, в какие приложения вы входите с помощью Internet Identity, не передаются Google, Microsoft или Apple."
 
+msgid "No email selected."
+msgstr ""
+
 msgid "No identity found"
 msgstr "Идентификатор не найден"
 
@@ -679,6 +694,9 @@ msgstr "Выберите что-то узнаваемое, например, в�
 
 msgid "Please go back to your <0>existing device</0> and choose <1>Start over</1> to try again."
 msgstr "Пожалуйста, вернитесь на ваше <0>существующее устройство</0> и выберите <1>Начать заново</1>, чтобы повторить попытку."
+
+msgid "Postbox"
+msgstr ""
 
 msgid "Powered by"
 msgstr "Разработано"
@@ -797,6 +815,9 @@ msgstr "Выберите <0>Открыть в Safari</0> или <1>Открыт�
 msgid "Select each word in the correct order:"
 msgstr "Выберите каждое слово в правильном порядке:"
 
+msgid "Session timed out"
+msgstr ""
+
 msgid "Set as default sign-in"
 msgstr "Установить как вход по умолчанию"
 
@@ -805,6 +826,9 @@ msgstr "Показать все"
 
 msgid "Sign in"
 msgstr "Войти"
+
+msgid "Sign in again to continue where you left off."
+msgstr ""
 
 msgid "Sign in there."
 msgstr "Войти там."
@@ -838,6 +862,9 @@ msgstr "Вы зашли"
 
 msgid "Signing in securely"
 msgstr "Безопасный вход"
+
+msgid "Signing in..."
+msgstr ""
 
 msgid "Simplify your sign-in"
 msgstr "Новый способ входа"

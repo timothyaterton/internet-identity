@@ -61,6 +61,10 @@
           {$t`From:`}
           {selectedEmail.sender}
         </p>
+        <p class="text-text-tertiary text-sm">
+          {$t`To:`}
+          {selectedEmail.recipient}
+        </p>
       </div>
       <div class="border-border-secondary border-t pt-4">
         <pre

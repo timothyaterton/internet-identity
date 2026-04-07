@@ -13,6 +13,9 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+msgid "(no subject)"
+msgstr "(no subject)"
+
 msgid "{0} logo"
 msgstr "{0} logo"
 
@@ -277,6 +280,9 @@ msgstr "Edit {name}"
 msgid "Edit account"
 msgstr "Edit account"
 
+msgid "Emails received for your identity."
+msgstr "Emails received for your identity."
+
 msgid "Enable multiple accounts"
 msgstr "Enable multiple accounts"
 
@@ -316,6 +322,12 @@ msgstr "For example, user A logs into Internet Identity with their Google accoun
 
 msgid "Forget about remembering complicated usernames and passwords. With passkeys, you simply pick your name to log in — quick, safe, and hassle-free."
 msgstr "Forget about remembering complicated usernames and passwords. With passkeys, you simply pick your name to log in — quick, safe, and hassle-free."
+
+msgid "From:"
+msgstr "From:"
+
+msgid "To:"
+msgstr "To:"
 
 msgid "Full control"
 msgstr "Full control"
@@ -599,6 +611,9 @@ msgstr "Name your identity"
 msgid "No data is shared with Google, Microsoft or Apple on which applications you log in with Internet Identity."
 msgstr "No data is shared with Google, Microsoft or Apple on which applications you log in with Internet Identity."
 
+msgid "No email selected."
+msgstr "No email selected."
+
 msgid "No identity found"
 msgstr "No identity found"
 
@@ -679,6 +694,9 @@ msgstr "Pick something recognizable, like your name"
 
 msgid "Please go back to your <0>existing device</0> and choose <1>Start over</1> to try again."
 msgstr "Please go back to your <0>existing device</0> and choose <1>Start over</1> to try again."
+
+msgid "Postbox"
+msgstr "Postbox"
 
 msgid "Powered by"
 msgstr "Powered by"
@@ -797,6 +815,9 @@ msgstr "Select <0>Open in Safari</0> or <1>Open in Chrome</1>."
 msgid "Select each word in the correct order:"
 msgstr "Select each word in the correct order:"
 
+msgid "Session timed out"
+msgstr "Session timed out"
+
 msgid "Set as default sign-in"
 msgstr "Set as default sign-in"
 
@@ -805,6 +826,9 @@ msgstr "Show all"
 
 msgid "Sign in"
 msgstr "Sign in"
+
+msgid "Sign in again to continue where you left off."
+msgstr "Sign in again to continue where you left off."
 
 msgid "Sign in there."
 msgstr "Sign in there."
@@ -838,6 +862,9 @@ msgstr "Signed in"
 
 msgid "Signing in securely"
 msgstr "Signing in securely"
+
+msgid "Signing in..."
+msgstr "Signing in..."
 
 msgid "Simplify your sign-in"
 msgstr "Simplify your sign-in"
