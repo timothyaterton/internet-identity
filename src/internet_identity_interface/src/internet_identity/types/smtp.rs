@@ -12,8 +12,6 @@ pub const MAX_HEADER_NAME_BYTES: usize = 256;
 pub const MAX_HEADER_VALUE_BYTES: usize = 8_192;
 pub const MAX_EMAILS_PER_USER: usize = 10;
 
-pub const ACCEPTED_DOMAIN: &str = "id.ai";
-
 // --- SMTP error codes ---
 
 const SMTP_ERR_MAILBOX_UNAVAILABLE: u64 = 550;
@@ -78,6 +76,7 @@ pub struct PostboxEmail {
 
 #[derive(Clone, Debug)]
 pub struct ValidatedSmtpRequest {
+    pub anchor_number: u64,
     pub sender: String,
     pub recipient: String,
     pub subject: String,
@@ -113,25 +112,18 @@ fn validate_address_bounds(addr: &SmtpAddress, label: &str) -> Result<(), SmtpRe
     Ok(())
 }
 
-fn validate_envelope(envelope: &SmtpEnvelope) -> Result<(), SmtpResponse> {
+fn validate_envelope(envelope: &SmtpEnvelope) -> Result<u64, SmtpResponse> {
     validate_address_bounds(&envelope.from, "Sender")?;
     validate_address_bounds(&envelope.to, "Recipient")?;
 
-    if !envelope.to.domain.eq_ignore_ascii_case(ACCEPTED_DOMAIN) {
-        return Err(smtp_err(
-            SMTP_ERR_MAILBOX_UNAVAILABLE,
-            format!("Relay not permitted: domain must be {ACCEPTED_DOMAIN}"),
-        ));
-    }
-
-    envelope.to.user.parse::<u64>().map_err(|_| {
+    let anchor_number = envelope.to.user.parse::<u64>().map_err(|_| {
         smtp_err(
             SMTP_ERR_MAILBOX_UNAVAILABLE,
             "Recipient user must be a valid anchor number",
         )
     })?;
 
-    Ok(())
+    Ok(anchor_number)
 }
 
 fn validate_message(message: &SmtpMessage) -> Result<(), SmtpResponse> {
@@ -199,7 +191,7 @@ impl TryFrom<SmtpRequest> for ValidatedSmtpRequest {
             .as_ref()
             .ok_or_else(|| smtp_err(SMTP_ERR_SYNTAX_ERROR, "Missing envelope"))?;
 
-        validate_envelope(envelope)?;
+        let anchor_number = validate_envelope(envelope)?;
 
         let message = request
             .message
@@ -211,6 +203,7 @@ impl TryFrom<SmtpRequest> for ValidatedSmtpRequest {
         let body = String::from_utf8_lossy(&message.body).into_owned();
 
         Ok(ValidatedSmtpRequest {
+            anchor_number,
             sender: format_address(&envelope.from),
             recipient: format_address(&envelope.to),
             subject: extract_subject(&message.headers),

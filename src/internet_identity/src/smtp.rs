@@ -2,7 +2,6 @@ use crate::state;
 use crate::storage::storable::smtp::StorableEmail;
 use internet_identity_interface::internet_identity::types::smtp::{
     validate_envelope_only, PostboxEmail, SmtpRequest, SmtpResponse, ValidatedSmtpRequest,
-    ACCEPTED_DOMAIN,
 };
 use internet_identity_interface::internet_identity::types::AnchorNumber;
 
@@ -14,23 +13,22 @@ pub fn handle_smtp_request(request: SmtpRequest) -> SmtpResponse {
 
     let email = StorableEmail {
         sender: validated.sender,
-        recipient: validated.recipient.clone(),
+        recipient: validated.recipient,
         subject: validated.subject,
         body: validated.body,
     };
 
     state::storage_borrow_mut(|storage| {
-        storage.store_email(validated.recipient, email);
+        storage.store_email(validated.anchor_number.to_string(), email);
     });
 
     SmtpResponse::Ok {}
 }
 
 pub fn get_postbox(anchor_number: AnchorNumber) -> Vec<PostboxEmail> {
-    let recipient = format!("{anchor_number}@{ACCEPTED_DOMAIN}");
     state::storage_borrow(|storage| {
         storage
-            .get_emails(&recipient)
+            .get_emails(&anchor_number.to_string())
             .into_iter()
             .rev()
             .map(|e| PostboxEmail {
