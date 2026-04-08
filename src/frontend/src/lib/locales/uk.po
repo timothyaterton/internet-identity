@@ -26,7 +26,7 @@ msgid "{application} has moved to the new Internet Identity"
 msgstr "{application} перейшов до нової версії Internet Identity"
 
 msgid "{identityName} has been removed from this device."
-msgstr ""
+msgstr "{identityName} було видалено з цього пристрою."
 
 msgid "{MAX_ACCOUNTS, plural, one {You have reached the maximum of # account for a single app.} other {You have reached the maximum of # accounts for a single app.}}"
 msgstr "{MAX_ACCOUNTS, plural, one {Ви досягли максимуму # облікового запису для одного застосунку.} few {Ви досягли максимуму # облікових записів для одного застосунку.} many {Ви досягли максимуму # облікових записів для одного застосунку.} other {Ви досягли максимуму # облікових записів для одного застосунку.}}"
@@ -272,7 +272,7 @@ msgid "Easy access"
 msgstr "Легкий доступ"
 
 msgid "Edit"
-msgstr ""
+msgstr "Редагувати"
 
 msgid "Edit {name}"
 msgstr "Редагувати {name}"
@@ -396,7 +396,7 @@ msgid "I have written it down"
 msgstr "Я це записав(-ла)"
 
 msgid "Identities on this device"
-msgstr ""
+msgstr "Ідентифікатори на цьому пристрої"
 
 msgid "Identity already upgraded"
 msgstr "Ідентифікатор вже оновлено"
@@ -417,7 +417,7 @@ msgid "Identity number"
 msgstr "Номер ідентифікатора"
 
 msgid "Identity removed"
-msgstr ""
+msgstr "Ідентифікатор видалено"
 
 msgid "Identity upgraded!"
 msgstr "Ідентифікатор оновлено!"
@@ -732,10 +732,10 @@ msgid "Remove"
 msgstr "Видалити"
 
 msgid "Remove from this device"
-msgstr ""
+msgstr "Видалити з цього пристрою"
 
 msgid "Remove identities you don't use. You can add them back anytime by signing in again."
-msgstr ""
+msgstr "Видаліть ідентичності, які ви не використовуєте. Ви можете додати їх знову будь-коли, увійшовши повторно."
 
 msgid "Remove passkey"
 msgstr "Видалити ключ доступу"
@@ -816,7 +816,7 @@ msgid "Select each word in the correct order:"
 msgstr "Виберіть кожне слово в правильному порядку:"
 
 msgid "Session timed out"
-msgstr ""
+msgstr "Час сеансу минув"
 
 msgid "Set as default sign-in"
 msgstr "Встановити як вхід за замовчуванням"
@@ -828,7 +828,7 @@ msgid "Sign in"
 msgstr "Увійти"
 
 msgid "Sign in again to continue where you left off."
-msgstr ""
+msgstr "Увійдіть знову, щоб продовжити з того місця, де ви зупинилися."
 
 msgid "Sign in there."
 msgstr "Увійдіть там."
@@ -846,25 +846,25 @@ msgid "Sign out"
 msgstr "Вийти"
 
 msgid "Sign out and keep identity"
-msgstr ""
+msgstr "Вийти та зберегти ідентичність"
 
 msgid "Sign out and remove from device"
-msgstr ""
+msgstr "Вийти та видалити з пристрою"
 
 msgid "Sign out from this device"
-msgstr ""
+msgstr "Вийти з цього пристрою"
 
 msgid "Sign out to remove"
-msgstr ""
+msgstr "Вийдіть, щоб видалити"
 
 msgid "Signed in"
-msgstr ""
+msgstr "Увійшли"
 
 msgid "Signing in securely"
 msgstr "Безпечний вхід"
 
 msgid "Signing in..."
-msgstr ""
+msgstr "Вхід..."
 
 msgid "Simplify your sign-in"
 msgstr "Спростіть свій вхід"
@@ -1022,7 +1022,7 @@ msgid "Understanding Internet Identity"
 msgstr "Знайомство з Internet Identity"
 
 msgid "Undo"
-msgstr ""
+msgstr "Скасувати"
 
 msgid "Unexpected error"
 msgstr "Несподівана помилка"
@@ -1166,16 +1166,16 @@ msgid "You are upgrading ID <0>{identityNumber}</0>"
 msgstr "Ви оновлюєте ID <0>{identityNumber}</0>"
 
 msgid "You can add it back anytime by signing in with the same {openIdProvider} account."
-msgstr ""
+msgstr "Ви можете додати її знову будь-коли, увійшовши з тим самим обліковим записом {openIdProvider}."
 
 msgid "You can add it back anytime by signing in with the same passkey."
-msgstr ""
+msgstr "Ви можете додати її знову будь-коли, увійшовши з тим самим ключем доступу."
 
 msgid "You can continue with <0>Use existing Passkey</0> in the login process."
 msgstr "Ви можете продовжити з <0>Використати існуючий ключ доступу</0> у процесі входу."
 
 msgid "You can either sign out and keep your identity saved for a faster login next time, or remove it entirely from this device."
-msgstr ""
+msgstr "Ви можете вийти та зберегти свою ідентичність для швидшого входу наступного разу, або повністю видалити її з цього пристрою."
 
 msgid "You can recover your identity now, verify you saved it correctly."
 msgstr "Ви можете відновити свій ідентифікатор зараз, перевірте, чи ви зберегли його правильно."
