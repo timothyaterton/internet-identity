@@ -1847,7 +1847,8 @@ impl<M: Memory + Clone> Storage<M> {
             .unwrap_or_default()
     }
 
-    pub fn store_email(&mut self, recipient: String, email: StorableEmail) {
+    /// Stores an email and returns the index of the newly stored email within the list.
+    pub fn store_email(&mut self, recipient: String, email: StorableEmail) -> usize {
         use internet_identity_interface::internet_identity::types::smtp::MAX_EMAILS_PER_USER;
 
         let key = StorableEmailAddress(recipient);
@@ -1864,7 +1865,24 @@ impl<M: Memory + Clone> Storage<M> {
             list.emails = list.emails.split_off(start);
         }
 
+        let index = list.emails.len() - 1;
         self.smtp_postbox.insert(key, list);
+        index
+    }
+
+    pub fn update_email_dkim_status(
+        &mut self,
+        recipient: String,
+        email_index: usize,
+        status: internet_identity_interface::internet_identity::types::smtp::DkimVerificationStatus,
+    ) {
+        let key = StorableEmailAddress(recipient);
+        if let Some(mut list) = self.smtp_postbox.get(&key) {
+            if let Some(email) = list.emails.get_mut(email_index) {
+                email.dkim_status = Some(status);
+                self.smtp_postbox.insert(key, list);
+            }
+        }
     }
 
     pub fn memory_sizes(&self) -> HashMap<String, u64> {

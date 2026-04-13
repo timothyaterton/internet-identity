@@ -614,6 +614,15 @@ msgstr "Es werden keine Daten an Google, Microsoft oder Apple darüber weitergeg
 msgid "No email selected."
 msgstr ""
 
+msgid "DKIM verified"
+msgstr ""
+
+msgid "Not verified"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
 msgid "No identity found"
 msgstr "Keine Identität gefunden"
 

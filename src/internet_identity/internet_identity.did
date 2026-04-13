@@ -1072,11 +1072,18 @@ type SmtpResponse = variant {
     Err : SmtpRequestError;
 };
 
+type DkimVerificationStatus = variant {
+    Verified;
+    Unverified : record { reason : text };
+    Pending;
+};
+
 type PostboxEmail = record {
     sender : text;
     recipient : text;
     subject : text;
     body : text;
+    dkim_status : opt DkimVerificationStatus;
 };
 
 service : (opt InternetIdentityInit) -> {

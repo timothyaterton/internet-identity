@@ -614,6 +614,15 @@ msgstr "Никакие данные о том, в какие приложени�
 msgid "No email selected."
 msgstr ""
 
+msgid "DKIM verified"
+msgstr ""
+
+msgid "Not verified"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
 msgid "No identity found"
 msgstr "Учётная запись не найдена"
 

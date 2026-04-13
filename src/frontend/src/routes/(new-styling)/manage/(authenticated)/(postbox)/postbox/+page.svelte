@@ -1,5 +1,6 @@
 <script lang="ts">
   import { t } from "$lib/stores/locale.store";
+  import { CircleCheckIcon, CircleAlertIcon } from "@lucide/svelte";
   import type { PageProps } from "./$types";
   import type { PostboxEmail } from "$lib/generated/internet_identity_types";
 
@@ -41,8 +42,20 @@
             <span class="text-text-primary truncate text-sm font-medium">
               {email.subject || $t`(no subject)`}
             </span>
-            <span class="text-text-tertiary truncate text-xs">
-              {email.sender}
+            <span class="text-text-tertiary flex items-center gap-1 text-xs">
+              <span class="truncate">{email.sender}</span>
+              {#if email.dkim_status[0] !== undefined}
+                {@const status = email.dkim_status[0]}
+                {#if "Verified" in status}
+                  <CircleCheckIcon
+                    class="text-fg-success-primary size-4 shrink-0"
+                  />
+                {:else}
+                  <CircleAlertIcon
+                    class="text-fg-warning-primary size-4 shrink-0"
+                  />
+                {/if}
+              {/if}
             </span>
           </button>
         </li>
@@ -65,6 +78,26 @@
           {$t`To:`}
           {selectedEmail.recipient}
         </p>
+        {#if selectedEmail.dkim_status[0] !== undefined}
+          {@const status = selectedEmail.dkim_status[0]}
+          <div class="mt-2 flex items-center gap-2">
+            {#if "Verified" in status}
+              <CircleCheckIcon class="text-fg-success-primary size-4" />
+              <span class="text-fg-success-primary text-sm">
+                {$t`DKIM verified`}
+              </span>
+            {:else if "Pending" in status}
+              <span class="text-text-tertiary text-sm">
+                {$t`Verifying...`}
+              </span>
+            {:else}
+              <CircleAlertIcon class="text-fg-warning-primary size-4" />
+              <span class="text-fg-warning-primary text-sm">
+                {$t`Not verified`}
+              </span>
+            {/if}
+          </div>
+        {/if}
       </div>
       <div class="border-border-secondary border-t pt-4">
         <pre

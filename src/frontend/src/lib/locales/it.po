@@ -614,6 +614,15 @@ msgstr "Nessun dato relativo alle applicazioni a cui accedi con Internet Identit
 msgid "No email selected."
 msgstr ""
 
+msgid "DKIM verified"
+msgstr ""
+
+msgid "Not verified"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
 msgid "No identity found"
 msgstr "Nessuna identità trovata"
 

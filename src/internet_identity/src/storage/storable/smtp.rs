@@ -2,8 +2,8 @@ use candid::{CandidType, Deserialize};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
 use internet_identity_interface::internet_identity::types::smtp::{
-    MAX_BODY_BYTES, MAX_EMAILS_PER_USER, MAX_EMAIL_DOMAIN_BYTES, MAX_EMAIL_USER_BYTES,
-    MAX_SUBJECT_BYTES,
+    DkimVerificationStatus, MAX_BODY_BYTES, MAX_EMAILS_PER_USER, MAX_EMAIL_DOMAIN_BYTES,
+    MAX_EMAIL_USER_BYTES, MAX_SUBJECT_BYTES,
 };
 use std::borrow::Cow;
 
@@ -13,11 +13,11 @@ const STORABLE_EMAIL_ADDRESS_MAX_SIZE: u32 =
     (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES + 20) as u32;
 
 /// Max serialized size of a single email.
-/// sender (320) + recipient (320) + subject (256) + body (5_000) + Candid overhead (~100 bytes).
+/// sender (320) + recipient (320) + subject (256) + body (5_000) + Candid overhead (~110 bytes).
 const STORABLE_EMAIL_MAX_SIZE: u32 = (MAX_EMAIL_USER_BYTES + 1 + MAX_EMAIL_DOMAIN_BYTES) as u32 * 2
     + MAX_SUBJECT_BYTES as u32
     + MAX_BODY_BYTES as u32
-    + 100;
+    + 110;
 
 /// Max serialized size of the email list value.
 const STORABLE_EMAIL_LIST_MAX_SIZE: u32 =
@@ -47,6 +47,7 @@ pub struct StorableEmail {
     pub recipient: String,
     pub subject: String,
     pub body: String,
+    pub dkim_status: Option<DkimVerificationStatus>,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]

@@ -614,6 +614,15 @@ msgstr "No se comparten datos con Google, Microsoft o Apple sobre en qué aplica
 msgid "No email selected."
 msgstr ""
 
+msgid "DKIM verified"
+msgstr ""
+
+msgid "Not verified"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
 msgid "No identity found"
 msgstr "No se encontró ninguna identidad"
 

@@ -462,6 +462,9 @@ export interface DeviceWithUsage {
   'purpose' : Purpose,
   'credential_id' : [] | [CredentialId],
 }
+export type DkimVerificationStatus = { 'Unverified' : { 'reason' : string } } |
+  { 'Verified' : null } |
+  { 'Pending' : null };
 export interface DummyAuthConfig {
   /**
    * Prompts user for a index value (0 - 255) when set to true,
@@ -945,6 +948,7 @@ export interface OpenIdPrepareDelegationResponse {
   'anchor_number' : UserNumber,
 }
 export interface PostboxEmail {
+  'dkim_status' : [] | [DkimVerificationStatus],
   'subject' : string,
   'body' : string,
   'recipient' : string,

@@ -614,6 +614,15 @@ msgstr "No data is shared with Google, Microsoft or Apple on which applications 
 msgid "No email selected."
 msgstr "No email selected."
 
+msgid "DKIM verified"
+msgstr "DKIM verified"
+
+msgid "Not verified"
+msgstr "Not verified"
+
+msgid "Verifying..."
+msgstr "Verifying..."
+
 msgid "No identity found"
 msgstr "No identity found"
 

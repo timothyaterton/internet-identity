@@ -55,6 +55,7 @@ mod delegation;
 mod http;
 mod ii_domain;
 
+mod dkim;
 mod openid;
 mod smtp;
 mod state;

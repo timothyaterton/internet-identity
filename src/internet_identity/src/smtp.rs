@@ -1,7 +1,8 @@
 use crate::state;
 use crate::storage::storable::smtp::StorableEmail;
 use internet_identity_interface::internet_identity::types::smtp::{
-    validate_envelope_only, PostboxEmail, SmtpRequest, SmtpResponse, ValidatedSmtpRequest,
+    validate_envelope_only, DkimVerificationStatus, PostboxEmail, SmtpRequest, SmtpResponse,
+    ValidatedSmtpRequest,
 };
 use internet_identity_interface::internet_identity::types::AnchorNumber;
 
@@ -11,16 +12,31 @@ pub fn handle_smtp_request(request: SmtpRequest) -> SmtpResponse {
         Err(response) => return response,
     };
 
+    let headers = validated.headers.clone();
+    let raw_body = validated.raw_body.clone();
+    let recipient_key = validated.anchor_number.to_string();
+
     let email = StorableEmail {
         sender: validated.sender,
         recipient: validated.recipient,
         subject: validated.subject,
         body: validated.body,
+        dkim_status: Some(DkimVerificationStatus::Pending),
     };
 
-    state::storage_borrow_mut(|storage| {
-        storage.store_email(validated.anchor_number.to_string(), email);
-    });
+    let email_index =
+        state::storage_borrow_mut(|storage| storage.store_email(recipient_key.clone(), email));
+
+    // Spawn async DKIM verification (best-effort, fire-and-forget)
+    #[cfg(not(test))]
+    {
+        ic_cdk::spawn(async move {
+            let status = crate::dkim::verify_email_dkim(&headers, &raw_body).await;
+            state::storage_borrow_mut(|storage| {
+                storage.update_email_dkim_status(recipient_key, email_index, status);
+            });
+        });
+    }
 
     SmtpResponse::Ok {}
 }
@@ -36,6 +52,7 @@ pub fn get_postbox(anchor_number: AnchorNumber) -> Vec<PostboxEmail> {
                 recipient: e.recipient,
                 subject: e.subject,
                 body: e.body,
+                dkim_status: e.dkim_status,
             })
             .collect()
     })

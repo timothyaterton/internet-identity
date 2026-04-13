@@ -614,6 +614,15 @@ msgstr "Tidak ada data yang dibagikan kepada Google, Microsoft, atau Apple menge
 msgid "No email selected."
 msgstr ""
 
+msgid "DKIM verified"
+msgstr ""
+
+msgid "Not verified"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
 msgid "No identity found"
 msgstr "Tidak ada identitas yang ditemukan"
 

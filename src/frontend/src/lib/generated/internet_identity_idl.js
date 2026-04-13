@@ -388,7 +388,13 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Principal,
     'NoSuchCredentials' : IDL.Text,
   });
+  const DkimVerificationStatus = IDL.Variant({
+    'Unverified' : IDL.Record({ 'reason' : IDL.Text }),
+    'Verified' : IDL.Null,
+    'Pending' : IDL.Null,
+  });
   const PostboxEmail = IDL.Record({
+    'dkim_status' : IDL.Opt(DkimVerificationStatus),
     'subject' : IDL.Text,
     'body' : IDL.Text,
     'recipient' : IDL.Text,

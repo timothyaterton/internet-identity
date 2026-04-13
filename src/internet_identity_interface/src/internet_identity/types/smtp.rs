@@ -62,6 +62,15 @@ pub enum SmtpResponse {
     Err(SmtpRequestError),
 }
 
+// --- DKIM verification ---
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub enum DkimVerificationStatus {
+    Verified,
+    Unverified { reason: String },
+    Pending,
+}
+
 // --- Postbox query types ---
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -70,6 +79,7 @@ pub struct PostboxEmail {
     pub recipient: String,
     pub subject: String,
     pub body: String,
+    pub dkim_status: Option<DkimVerificationStatus>,
 }
 
 // --- Validated internal types ---
@@ -81,6 +91,8 @@ pub struct ValidatedSmtpRequest {
     pub recipient: String,
     pub subject: String,
     pub body: String,
+    pub headers: Vec<SmtpHeader>,
+    pub raw_body: Vec<u8>,
 }
 
 // --- Helpers ---
@@ -207,6 +219,8 @@ impl TryFrom<SmtpRequest> for ValidatedSmtpRequest {
             sender: format_address(&envelope.from),
             recipient: format_address(&envelope.to),
             subject: extract_subject(&message.headers),
+            headers: message.headers.clone(),
+            raw_body: message.body.to_vec(),
             body,
         })
     }
