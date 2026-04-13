@@ -12,8 +12,6 @@ pub fn handle_smtp_request(request: SmtpRequest) -> SmtpResponse {
         Err(response) => return response,
     };
 
-    let headers = validated.headers.clone();
-    let raw_body = validated.raw_body.clone();
     let recipient_key = validated.anchor_number.to_string();
 
     let email = StorableEmail {
@@ -24,17 +22,30 @@ pub fn handle_smtp_request(request: SmtpRequest) -> SmtpResponse {
         dkim_status: Some(DkimVerificationStatus::Pending),
     };
 
-    let email_index =
-        state::storage_borrow_mut(|storage| storage.store_email(recipient_key.clone(), email));
-
-    // Spawn async DKIM verification (best-effort, fire-and-forget)
+    // Spawn async DKIM verification (best-effort, fire-and-forget).
+    // In non-test builds, the headers/body/index are consumed by the spawned task.
+    // In test builds, the spawn block is stripped so we suppress unused warnings.
     #[cfg(not(test))]
     {
+        let headers = validated.headers;
+        let raw_body = validated.raw_body;
+        let email_index =
+            state::storage_borrow_mut(|storage| storage.store_email(recipient_key.clone(), email));
+
         ic_cdk::spawn(async move {
             let status = crate::dkim::verify_email_dkim(&headers, &raw_body).await;
             state::storage_borrow_mut(|storage| {
                 storage.update_email_dkim_status(recipient_key, email_index, status);
             });
+        });
+    }
+
+    #[cfg(test)]
+    {
+        let _ = &validated.headers;
+        let _ = &validated.raw_body;
+        state::storage_borrow_mut(|storage| {
+            storage.store_email(recipient_key, email);
         });
     }
 

@@ -1,9 +1,13 @@
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
-use internet_identity_interface::internet_identity::types::smtp::{
-    DkimVerificationStatus, SmtpHeader,
-};
-use rsa::{Pkcs1v15Sign, RsaPublicKey};
+#[cfg(not(test))]
+use internet_identity_interface::internet_identity::types::smtp::DkimVerificationStatus;
+#[cfg(not(test))]
+use internet_identity_interface::internet_identity::types::smtp::SmtpHeader;
+#[cfg(not(test))]
+use rsa::Pkcs1v15Sign;
+use rsa::RsaPublicKey;
+#[cfg(not(test))]
 use sha2::{Digest, Sha256};
 
 // --- DKIM-Signature parsing ---
@@ -15,6 +19,7 @@ pub enum Canon {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(test, allow(dead_code))]
 pub struct DkimSignature {
     pub algorithm: String,
     pub domain: String,
@@ -149,6 +154,7 @@ fn canonicalize_body_simple(body: &[u8]) -> Vec<u8> {
     result
 }
 
+#[cfg(not(test))]
 fn canonicalize_body_relaxed(body: &[u8]) -> Vec<u8> {
     let text = String::from_utf8_lossy(body);
     let mut lines: Vec<String> = text
@@ -182,9 +188,10 @@ fn canonicalize_body_relaxed(body: &[u8]) -> Vec<u8> {
     result
 }
 
-// --- Verification ---
+// --- Verification (only used in non-test builds via the async orchestrator) ---
 
-pub fn verify_body_hash(raw_body: &[u8], sig: &DkimSignature) -> Result<(), String> {
+#[cfg(not(test))]
+fn verify_body_hash(raw_body: &[u8], sig: &DkimSignature) -> Result<(), String> {
     let canonicalized = match sig.body_canon {
         Canon::Simple => canonicalize_body_simple(raw_body),
         Canon::Relaxed => canonicalize_body_relaxed(raw_body),
@@ -203,7 +210,8 @@ pub fn verify_body_hash(raw_body: &[u8], sig: &DkimSignature) -> Result<(), Stri
 }
 
 /// Reconstruct the data that was signed per RFC 6376 section 3.7.
-pub fn build_signing_input(
+#[cfg(not(test))]
+fn build_signing_input(
     headers: &[SmtpHeader],
     dkim_header_value: &str,
     sig: &DkimSignature,
@@ -292,7 +300,8 @@ fn strip_b_value(header_value: &str) -> String {
     result
 }
 
-pub fn verify_rsa_sha256(
+#[cfg(not(test))]
+fn verify_rsa_sha256(
     signing_input: &[u8],
     signature: &[u8],
     public_key: &RsaPublicKey,
@@ -437,8 +446,9 @@ fn transform_doh_response(
     }
 }
 
-// --- Orchestrator ---
+// --- Orchestrator (only compiled in non-test builds) ---
 
+#[cfg(not(test))]
 pub async fn verify_email_dkim(headers: &[SmtpHeader], raw_body: &[u8]) -> DkimVerificationStatus {
     let dkim_header = match headers
         .iter()
@@ -483,7 +493,6 @@ pub async fn verify_email_dkim(headers: &[SmtpHeader], raw_body: &[u8]) -> DkimV
         };
     }
 
-    #[cfg(not(test))]
     let public_key = match fetch_dkim_public_key(&sig.selector, &sig.domain).await {
         Ok(pk) => pk,
         Err(e) => {
@@ -491,15 +500,6 @@ pub async fn verify_email_dkim(headers: &[SmtpHeader], raw_body: &[u8]) -> DkimV
                 reason: format!("Failed to fetch DKIM key: {e}"),
             }
         }
-    };
-
-    #[cfg(test)]
-    let public_key = {
-        // In tests, we don't do HTTP outcalls — return Unverified
-        let _ = &sig;
-        return DkimVerificationStatus::Unverified {
-            reason: "DKIM key fetch not available in tests".into(),
-        };
     };
 
     let signing_input = build_signing_input(headers, &dkim_header.value, &sig);

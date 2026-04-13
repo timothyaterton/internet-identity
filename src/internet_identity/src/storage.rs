@@ -1870,6 +1870,7 @@ impl<M: Memory + Clone> Storage<M> {
         index
     }
 
+    #[cfg_attr(test, allow(dead_code))]
     pub fn update_email_dkim_status(
         &mut self,
         recipient: String,
