@@ -623,6 +623,30 @@ msgstr "Not verified"
 msgid "Verifying..."
 msgstr "Verifying..."
 
+msgid "Verification details"
+msgstr "Verification details"
+
+msgid "DKIM-Signature header present"
+msgstr "DKIM-Signature header present"
+
+msgid "Signature parsed"
+msgstr "Signature parsed"
+
+msgid "Algorithm supported"
+msgstr "Algorithm supported"
+
+msgid "Required headers signed"
+msgstr "Required headers signed"
+
+msgid "Body hash valid"
+msgstr "Body hash valid"
+
+msgid "Public key fetched via DNS"
+msgstr "Public key fetched via DNS"
+
+msgid "RSA signature valid"
+msgstr "RSA signature valid"
+
 msgid "No identity found"
 msgstr "No identity found"
 

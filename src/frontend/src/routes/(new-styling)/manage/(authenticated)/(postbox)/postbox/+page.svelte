@@ -1,8 +1,19 @@
 <script lang="ts">
   import { t } from "$lib/stores/locale.store";
-  import { CircleCheckIcon, CircleAlertIcon } from "@lucide/svelte";
+  import {
+    CircleCheckIcon,
+    CircleAlertIcon,
+    CircleXIcon,
+    CircleMinusIcon,
+  } from "@lucide/svelte";
   import type { PageProps } from "./$types";
-  import type { PostboxEmail } from "$lib/generated/internet_identity_types";
+  import type {
+    PostboxEmail,
+    DkimCheck,
+    DkimCheckName,
+    DkimCheckStatus,
+    DkimVerificationStatus,
+  } from "$lib/generated/internet_identity_types";
 
   const { data }: PageProps = $props();
 
@@ -11,6 +22,29 @@
   const selectedEmail: PostboxEmail | undefined = $derived(
     emails[selectedIndex],
   );
+
+  const checkLabel = (name: DkimCheckName): string => {
+    if ("DkimSignaturePresent" in name)
+      return $t`DKIM-Signature header present`;
+    if ("SignatureParsed" in name) return $t`Signature parsed`;
+    if ("AlgorithmSupported" in name) return $t`Algorithm supported`;
+    if ("RequiredHeadersSigned" in name) return $t`Required headers signed`;
+    if ("BodyHashValid" in name) return $t`Body hash valid`;
+    if ("PublicKeyFetched" in name) return $t`Public key fetched via DNS`;
+    if ("SignatureValid" in name) return $t`RSA signature valid`;
+    return "";
+  };
+
+  const isPass = (status: DkimCheckStatus): boolean => "Pass" in status;
+  const isFail = (status: DkimCheckStatus): boolean => "Fail" in status;
+
+  const getChecks = (
+    status: DkimVerificationStatus,
+  ): DkimCheck[] | undefined => {
+    if ("Verified" in status) return status.Verified.checks;
+    if ("Unverified" in status) return status.Unverified.checks;
+    return undefined;
+  };
 </script>
 
 <header class="flex flex-col gap-3">
@@ -48,10 +82,17 @@
                 {@const status = email.dkim_status[0]}
                 {#if "Verified" in status}
                   <CircleCheckIcon
+                    title={$t`DKIM verified`}
                     class="text-fg-success-primary size-4 shrink-0"
+                  />
+                {:else if "Pending" in status}
+                  <CircleMinusIcon
+                    title={$t`Verifying...`}
+                    class="text-text-tertiary size-4 shrink-0"
                   />
                 {:else}
                   <CircleAlertIcon
+                    title={$t`Not verified`}
                     class="text-fg-warning-primary size-4 shrink-0"
                   />
                 {/if}
@@ -80,6 +121,7 @@
         </p>
         {#if selectedEmail.dkim_status[0] !== undefined}
           {@const status = selectedEmail.dkim_status[0]}
+          {@const checks = getChecks(status)}
           <div class="mt-2 flex items-center gap-2">
             {#if "Verified" in status}
               <CircleCheckIcon class="text-fg-success-primary size-4" />
@@ -87,6 +129,7 @@
                 {$t`DKIM verified`}
               </span>
             {:else if "Pending" in status}
+              <CircleMinusIcon class="text-text-tertiary size-4" />
               <span class="text-text-tertiary text-sm">
                 {$t`Verifying...`}
               </span>
@@ -97,6 +140,55 @@
               </span>
             {/if}
           </div>
+          {#if checks !== undefined}
+            <div
+              class="bg-bg-tertiary border-border-secondary mt-2 flex max-h-80 w-80 flex-col overflow-y-auto rounded-lg border p-3"
+            >
+              <span class="text-text-primary mb-2 text-xs font-semibold">
+                {$t`Verification details`}
+              </span>
+              <ul class="flex flex-col gap-1.5">
+                {#each checks as check}
+                  <li class="flex flex-col gap-0.5">
+                    <div class="flex items-center gap-1.5">
+                      {#if isPass(check.status)}
+                        <CircleCheckIcon
+                          class="text-fg-success-primary size-3.5 shrink-0"
+                        />
+                      {:else if isFail(check.status)}
+                        <CircleXIcon
+                          class="text-fg-danger-primary size-3.5 shrink-0"
+                        />
+                      {:else}
+                        <CircleMinusIcon
+                          class="text-text-disabled size-3.5 shrink-0"
+                        />
+                      {/if}
+                      <span
+                        class={[
+                          "text-xs",
+                          isPass(check.status)
+                            ? "text-text-primary"
+                            : isFail(check.status)
+                              ? "text-fg-danger-primary"
+                              : "text-text-disabled",
+                        ]}
+                      >
+                        {checkLabel(check.name)}
+                      </span>
+                    </div>
+                    {#if check.detail[0] !== undefined}
+                      <span
+                        class="text-text-tertiary ml-5 text-[11px] break-words"
+                      >
+                        {check.detail[0]}
+                      </span>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
         {/if}
       </div>
       <div class="border-border-secondary border-t pt-4">

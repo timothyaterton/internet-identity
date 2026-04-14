@@ -388,9 +388,28 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Principal,
     'NoSuchCredentials' : IDL.Text,
   });
+  const DkimCheckStatus = IDL.Variant({
+    'Skipped' : IDL.Null,
+    'Fail' : IDL.Null,
+    'Pass' : IDL.Null,
+  });
+  const DkimCheckName = IDL.Variant({
+    'DkimSignaturePresent' : IDL.Null,
+    'PublicKeyFetched' : IDL.Null,
+    'AlgorithmSupported' : IDL.Null,
+    'BodyHashValid' : IDL.Null,
+    'SignatureValid' : IDL.Null,
+    'SignatureParsed' : IDL.Null,
+    'RequiredHeadersSigned' : IDL.Null,
+  });
+  const DkimCheck = IDL.Record({
+    'status' : DkimCheckStatus,
+    'name' : DkimCheckName,
+    'detail' : IDL.Opt(IDL.Text),
+  });
   const DkimVerificationStatus = IDL.Variant({
-    'Unverified' : IDL.Record({ 'reason' : IDL.Text }),
-    'Verified' : IDL.Null,
+    'Unverified' : IDL.Record({ 'checks' : IDL.Vec(DkimCheck) }),
+    'Verified' : IDL.Record({ 'checks' : IDL.Vec(DkimCheck) }),
     'Pending' : IDL.Null,
   });
   const PostboxEmail = IDL.Record({

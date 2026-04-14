@@ -65,9 +65,34 @@ pub enum SmtpResponse {
 // --- DKIM verification ---
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
+pub enum DkimCheckName {
+    DkimSignaturePresent,
+    SignatureParsed,
+    AlgorithmSupported,
+    RequiredHeadersSigned,
+    BodyHashValid,
+    PublicKeyFetched,
+    SignatureValid,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub enum DkimCheckStatus {
+    Pass,
+    Fail,
+    Skipped,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct DkimCheck {
+    pub name: DkimCheckName,
+    pub status: DkimCheckStatus,
+    pub detail: Option<String>,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
 pub enum DkimVerificationStatus {
-    Verified,
-    Unverified { reason: String },
+    Verified { checks: Vec<DkimCheck> },
+    Unverified { checks: Vec<DkimCheck> },
     Pending,
 }
 

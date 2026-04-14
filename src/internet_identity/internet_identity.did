@@ -1072,9 +1072,31 @@ type SmtpResponse = variant {
     Err : SmtpRequestError;
 };
 
+type DkimCheckName = variant {
+    DkimSignaturePresent;
+    SignatureParsed;
+    AlgorithmSupported;
+    RequiredHeadersSigned;
+    BodyHashValid;
+    PublicKeyFetched;
+    SignatureValid;
+};
+
+type DkimCheckStatus = variant {
+    Pass;
+    Fail;
+    Skipped;
+};
+
+type DkimCheck = record {
+    name : DkimCheckName;
+    status : DkimCheckStatus;
+    detail : opt text;
+};
+
 type DkimVerificationStatus = variant {
-    Verified;
-    Unverified : record { reason : text };
+    Verified : record { checks : vec DkimCheck };
+    Unverified : record { checks : vec DkimCheck };
     Pending;
 };
 

@@ -1,9 +1,9 @@
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
 #[cfg(not(test))]
-use internet_identity_interface::internet_identity::types::smtp::DkimVerificationStatus;
-#[cfg(not(test))]
-use internet_identity_interface::internet_identity::types::smtp::SmtpHeader;
+use internet_identity_interface::internet_identity::types::smtp::{
+    DkimCheck, DkimCheckName, DkimCheckStatus, DkimVerificationStatus, SmtpHeader,
+};
 #[cfg(not(test))]
 use rsa::Pkcs1v15Sign;
 use rsa::RsaPublicKey;
@@ -449,66 +449,188 @@ fn transform_doh_response(
 // --- Orchestrator (only compiled in non-test builds) ---
 
 #[cfg(not(test))]
+fn pass(name: DkimCheckName, detail: Option<String>) -> DkimCheck {
+    DkimCheck {
+        name,
+        status: DkimCheckStatus::Pass,
+        detail,
+    }
+}
+
+#[cfg(not(test))]
+fn fail(name: DkimCheckName, detail: String) -> DkimCheck {
+    DkimCheck {
+        name,
+        status: DkimCheckStatus::Fail,
+        detail: Some(detail),
+    }
+}
+
+#[cfg(not(test))]
+fn skipped(name: DkimCheckName) -> DkimCheck {
+    DkimCheck {
+        name,
+        status: DkimCheckStatus::Skipped,
+        detail: None,
+    }
+}
+
+#[cfg(not(test))]
+fn skip_remaining(checks: &mut Vec<DkimCheck>, names: &[DkimCheckName]) {
+    for name in names {
+        checks.push(skipped(name.clone()));
+    }
+}
+
+#[cfg(not(test))]
 pub async fn verify_email_dkim(headers: &[SmtpHeader], raw_body: &[u8]) -> DkimVerificationStatus {
+    let mut checks: Vec<DkimCheck> = Vec::new();
+
+    // 1. DKIM-Signature header present
     let dkim_header = match headers
         .iter()
         .find(|h| h.name.eq_ignore_ascii_case("dkim-signature"))
     {
-        Some(h) => h,
+        Some(h) => {
+            checks.push(pass(DkimCheckName::DkimSignaturePresent, None));
+            h
+        }
         None => {
-            return DkimVerificationStatus::Unverified {
-                reason: "No DKIM-Signature header".into(),
-            }
+            checks.push(fail(
+                DkimCheckName::DkimSignaturePresent,
+                "No DKIM-Signature header found".into(),
+            ));
+            skip_remaining(
+                &mut checks,
+                &[
+                    DkimCheckName::SignatureParsed,
+                    DkimCheckName::AlgorithmSupported,
+                    DkimCheckName::RequiredHeadersSigned,
+                    DkimCheckName::BodyHashValid,
+                    DkimCheckName::PublicKeyFetched,
+                    DkimCheckName::SignatureValid,
+                ],
+            );
+            return DkimVerificationStatus::Unverified { checks };
         }
     };
 
+    // 2. Signature parsed
     let sig = match parse_dkim_signature(&dkim_header.value) {
-        Ok(s) => s,
+        Ok(s) => {
+            checks.push(pass(
+                DkimCheckName::SignatureParsed,
+                Some(format!("d={}, s={}", s.domain, s.selector)),
+            ));
+            s
+        }
         Err(e) => {
-            return DkimVerificationStatus::Unverified {
-                reason: format!("Failed to parse DKIM-Signature: {e}"),
-            }
+            checks.push(fail(DkimCheckName::SignatureParsed, e));
+            skip_remaining(
+                &mut checks,
+                &[
+                    DkimCheckName::AlgorithmSupported,
+                    DkimCheckName::RequiredHeadersSigned,
+                    DkimCheckName::BodyHashValid,
+                    DkimCheckName::PublicKeyFetched,
+                    DkimCheckName::SignatureValid,
+                ],
+            );
+            return DkimVerificationStatus::Unverified { checks };
         }
     };
 
-    if sig.algorithm != "rsa-sha256" {
-        return DkimVerificationStatus::Unverified {
-            reason: format!("Unsupported algorithm: {}", sig.algorithm),
-        };
+    // 3. Algorithm supported
+    if sig.algorithm == "rsa-sha256" {
+        checks.push(pass(
+            DkimCheckName::AlgorithmSupported,
+            Some("rsa-sha256".into()),
+        ));
+    } else {
+        checks.push(fail(
+            DkimCheckName::AlgorithmSupported,
+            format!("Unsupported: {}", sig.algorithm),
+        ));
+        skip_remaining(
+            &mut checks,
+            &[
+                DkimCheckName::RequiredHeadersSigned,
+                DkimCheckName::BodyHashValid,
+                DkimCheckName::PublicKeyFetched,
+                DkimCheckName::SignatureValid,
+            ],
+        );
+        return DkimVerificationStatus::Unverified { checks };
     }
 
-    // Check required headers are signed (per design doc)
+    // 4. Required headers signed
     let required = ["from", "to", "subject"];
-    for req in &required {
-        if !sig.signed_headers.iter().any(|h| h == req) {
-            return DkimVerificationStatus::Unverified {
-                reason: format!("Required header '{req}' not in DKIM-signed headers"),
-            };
-        }
+    let missing: Vec<&str> = required
+        .iter()
+        .filter(|req| !sig.signed_headers.iter().any(|h| h == **req))
+        .copied()
+        .collect();
+
+    if missing.is_empty() {
+        checks.push(pass(
+            DkimCheckName::RequiredHeadersSigned,
+            Some(sig.signed_headers.join(", ")),
+        ));
+    } else {
+        checks.push(fail(
+            DkimCheckName::RequiredHeadersSigned,
+            format!("Missing: {}", missing.join(", ")),
+        ));
+        skip_remaining(
+            &mut checks,
+            &[
+                DkimCheckName::BodyHashValid,
+                DkimCheckName::PublicKeyFetched,
+                DkimCheckName::SignatureValid,
+            ],
+        );
+        return DkimVerificationStatus::Unverified { checks };
     }
 
+    // 5. Body hash valid
     if let Err(e) = verify_body_hash(raw_body, &sig) {
-        return DkimVerificationStatus::Unverified {
-            reason: format!("Body hash mismatch: {e}"),
-        };
+        checks.push(fail(DkimCheckName::BodyHashValid, e));
+        skip_remaining(
+            &mut checks,
+            &[
+                DkimCheckName::PublicKeyFetched,
+                DkimCheckName::SignatureValid,
+            ],
+        );
+        return DkimVerificationStatus::Unverified { checks };
     }
+    checks.push(pass(DkimCheckName::BodyHashValid, None));
 
+    // 6. Public key fetched
+    let dns_name = format!("{}._domainkey.{}", sig.selector, sig.domain);
     let public_key = match fetch_dkim_public_key(&sig.selector, &sig.domain).await {
-        Ok(pk) => pk,
+        Ok(pk) => {
+            checks.push(pass(DkimCheckName::PublicKeyFetched, Some(dns_name)));
+            pk
+        }
         Err(e) => {
-            return DkimVerificationStatus::Unverified {
-                reason: format!("Failed to fetch DKIM key: {e}"),
-            }
+            checks.push(fail(DkimCheckName::PublicKeyFetched, e));
+            skip_remaining(&mut checks, &[DkimCheckName::SignatureValid]);
+            return DkimVerificationStatus::Unverified { checks };
         }
     };
 
+    // 7. Signature valid
     let signing_input = build_signing_input(headers, &dkim_header.value, &sig);
-
     match verify_rsa_sha256(&signing_input, &sig.signature, &public_key) {
-        Ok(()) => DkimVerificationStatus::Verified,
-        Err(e) => DkimVerificationStatus::Unverified {
-            reason: format!("Signature verification failed: {e}"),
-        },
+        Ok(()) => {
+            checks.push(pass(DkimCheckName::SignatureValid, None));
+            DkimVerificationStatus::Verified { checks }
+        }
+        Err(e) => {
+            checks.push(fail(DkimCheckName::SignatureValid, e));
+            DkimVerificationStatus::Unverified { checks }
+        }
     }
 }
 
