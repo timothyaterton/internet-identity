@@ -388,11 +388,6 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Principal,
     'NoSuchCredentials' : IDL.Text,
   });
-  const DkimCheckStatus = IDL.Variant({
-    'Skipped' : IDL.Null,
-    'Fail' : IDL.Null,
-    'Pass' : IDL.Null,
-  });
   const DkimCheckName = IDL.Variant({
     'DkimSignaturePresent' : IDL.Null,
     'PublicKeyFetched' : IDL.Null,
@@ -401,6 +396,11 @@ export const idlFactory = ({ IDL }) => {
     'SignatureValid' : IDL.Null,
     'SignatureParsed' : IDL.Null,
     'RequiredHeadersSigned' : IDL.Null,
+  });
+  const DkimCheckStatus = IDL.Variant({
+    'Skipped' : IDL.Null,
+    'Fail' : IDL.Null,
+    'Pass' : IDL.Null,
   });
   const DkimCheck = IDL.Record({
     'status' : DkimCheckStatus,
