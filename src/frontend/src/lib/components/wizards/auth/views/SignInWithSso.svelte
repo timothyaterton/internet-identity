@@ -13,6 +13,7 @@
   } from "$lib/utils/ssoDiscovery";
   import type { SsoDiscoveryResult } from "$lib/utils/ssoDiscovery";
   import { OAuthProviderError } from "$lib/utils/openID";
+  import type { OpenIdCredential } from "$lib/generated/internet_identity_types";
   import { t } from "$lib/stores/locale.store";
 
   interface Props {
@@ -20,9 +21,10 @@
       result: SsoDiscoveryResult,
     ) => Promise<void | "cancelled">;
     goBack: () => void;
+    existingCredentials?: OpenIdCredential[];
   }
 
-  const { continueWithSso, goBack }: Props = $props();
+  const { continueWithSso, goBack, existingCredentials }: Props = $props();
 
   /**
    * Debounce delay before kicking off the (network-heavy) two-hop lookup.
@@ -47,62 +49,29 @@
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   const mapSubmitError = (e: unknown, domainInput: string): string => {
+    console.error("SSO sign-in error:", e);
     if (e instanceof DomainNotConfiguredError) {
-      if (e.reason === "http-error" && e.httpStatus !== undefined) {
-        return $t`${domainInput} didn't serve /.well-known/ii-openid-configuration (HTTP ${String(e.httpStatus)}). The domain owner needs to publish it for II to sign you in.`;
-      }
       if (e.reason === "network") {
         return $t`Couldn't reach ${domainInput}. Check the spelling and your network, then try again.`;
       }
-      if (e.detail !== undefined && e.detail.length > 0) {
-        return $t`${domainInput}'s /.well-known/ii-openid-configuration is malformed: ${e.detail}`;
-      }
-      return $t`${domainInput}'s /.well-known/ii-openid-configuration is malformed.`;
+      return $t`${domainInput} isn't set up for SSO with Internet Identity. The domain owner needs to publish /.well-known/ii-openid-configuration.`;
     }
     if (e instanceof OAuthProviderError) {
-      // `unsupported_response_type` is the signature of an SSO app that
-      // only allows the plain authorization-code flow. II needs the
-      // hybrid flow (id_token + code) because it verifies JWTs canister-
-      // side with no token-endpoint exchange. Spell out the fix so the
-      // SSO admin can act on it directly.
       if (e.error === "unsupported_response_type") {
-        return $t`${domainInput}'s SSO app doesn't allow the hybrid OAuth flow II requires. Ask the SSO admin to enable response_type "id_token code" (e.g. in Okta, set the app to Single-Page Application with "Implicit (hybrid)" grant enabled).`;
+        return $t`${domainInput}'s SSO app doesn't allow the hybrid OAuth flow II requires. Ask the SSO admin to enable response_type "id_token code".`;
       }
       if (e.error === "access_denied") {
-        return $t`${domainInput}'s SSO denied the sign-in. Try again, and check with your SSO admin if the problem persists.`;
-      }
-      if (e.errorDescription !== undefined && e.errorDescription.length > 0) {
-        return $t`${domainInput}'s SSO returned "${e.error}": ${e.errorDescription}`;
+        return $t`${domainInput}'s SSO denied the sign-in. Try again, or check with your SSO admin.`;
       }
       return $t`${domainInput}'s SSO returned error "${e.error}".`;
     }
     if (e instanceof Error) {
-      const msg = e.message;
-      if (msg.toLowerCase().includes("canary allowlist")) {
-        return $t`SSO is not available for "${domainInput}" yet. Ask an II admin to register this domain.`;
+      if (e.message.toLowerCase().includes("canary allowlist")) {
+        return $t`SSO is not available for "${domainInput}" yet.`;
       }
-      if (msg.includes("Provider issuer hostname mismatch")) {
-        return $t`SSO provider misconfigured: issuer doesn't match the configured hostname. (${msg})`;
-      }
-      if (msg.includes("Provider authorization endpoint hostname mismatch")) {
-        return $t`SSO provider misconfigured: authorization endpoint points to a different host than the issuer. (${msg})`;
-      }
-      if (msg.includes("Provider issuer must use HTTPS")) {
-        return $t`SSO provider misconfigured: issuer URL is not HTTPS. (${msg})`;
-      }
-      if (msg.includes("Provider authorization endpoint must use HTTPS")) {
-        return $t`SSO provider misconfigured: authorization endpoint is not HTTPS. (${msg})`;
-      }
-      if (msg.startsWith("Provider discovery:")) {
-        return $t`SSO provider's discovery document is malformed: ${msg}`;
-      }
-      if (msg.startsWith("Rate limited:")) {
+      if (e.message.startsWith("Rate limited:")) {
         return $t`Too many recent attempts for ${domainInput}. Wait a few minutes and try again.`;
       }
-      if (msg === "Too many concurrent SSO discovery requests") {
-        return $t`Several SSO sign-ins are in flight already. Wait a moment and try again.`;
-      }
-      return msg;
     }
     return $t`SSO sign-in failed. Please try again.`;
   };
@@ -156,7 +125,17 @@
         });
         const result = await discoverSsoConfig(trimmed);
         if (matchesCurrent()) {
-          preparedResult = result;
+          if (
+            existingCredentials?.some(
+              (c) =>
+                c.iss === result.discovery.issuer &&
+                c.aud === result.clientId,
+            )
+          ) {
+            error = $t`This SSO domain is already linked to your identity.`;
+          } else {
+            preparedResult = result;
+          }
         }
       } catch (e) {
         if (matchesCurrent()) {

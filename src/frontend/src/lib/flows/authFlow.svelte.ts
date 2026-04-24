@@ -108,7 +108,7 @@ export class AuthFlow {
         type: "signUp";
       }
   > => {
-    const { domain, clientId, discovery } = ssoResult;
+    const { domain, orgName, clientId, discovery } = ssoResult;
 
     // Build a synthetic OpenIdConfig from SSO discovery result
     const syntheticConfig: OpenIdConfig = {
@@ -151,7 +151,7 @@ export class AuthFlow {
       authenticationV2Funnel.trigger(AuthenticationV2Events.ContinueWithOpenID);
     }
     const { iss, sub, aud } = decodeJWT(jwt);
-    rememberSsoDomainForCredential({ iss, sub, aud }, domain);
+    rememberSsoDomainForCredential({ iss, sub, aud }, domain, orgName);
 
     return await this.continueWithOpenId(syntheticConfig, jwt);
   };

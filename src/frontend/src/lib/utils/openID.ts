@@ -472,7 +472,7 @@ export const openIdLogo = (
     aud !== undefined &&
     lookupSsoDomainForCredential({ iss: issuer, sub, aud }) !== undefined
   ) {
-    return undefined;
+    return undefined; // SSO credentials use the generic SSO icon
   }
   const logo = findConfig(issuer, aud, metadata)?.logo;
 
@@ -556,8 +556,8 @@ export const openIdName = (
   metadata: MetadataMapV2,
 ): string | undefined => {
   if (sub !== undefined && aud !== undefined) {
-    const domain = lookupSsoDomainForCredential({ iss: issuer, sub, aud });
-    if (domain !== undefined) return domain;
+    const ssoEntry = lookupSsoDomainForCredential({ iss: issuer, sub, aud });
+    if (ssoEntry !== undefined) return ssoEntry.orgName ?? ssoEntry.domain;
   }
   return findConfig(issuer, aud, metadata)?.name;
 };

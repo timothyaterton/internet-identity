@@ -155,7 +155,7 @@ export class AddAccessMethodFlow {
   linkSsoAccount = async (
     result: SsoDiscoveryResult,
   ): Promise<OpenIdCredential> => {
-    const { domain, clientId, discovery } = result;
+    const { domain, orgName, clientId, discovery } = result;
     const syntheticConfig: OpenIdConfig = {
       auth_uri: discovery.authorization_endpoint,
       jwks_uri: "",
@@ -171,6 +171,7 @@ export class AddAccessMethodFlow {
     rememberSsoDomainForCredential(
       { iss: credential.iss, sub: credential.sub, aud: credential.aud },
       domain,
+      orgName,
     );
     return credential;
   };

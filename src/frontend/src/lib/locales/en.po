@@ -25,14 +25,17 @@ msgstr "{application} has moved to the new Internet Identity"
 msgid "{displayName} account"
 msgstr "{displayName} account"
 
-msgid "{domainInput} didn't serve /.well-known/ii-openid-configuration (HTTP {0}). The domain owner needs to publish it for II to sign you in."
-msgstr "{domainInput} didn't serve /.well-known/ii-openid-configuration (HTTP {0}). The domain owner needs to publish it for II to sign you in."
+msgid "{domainInput} isn't set up for SSO with Internet Identity. The domain owner needs to publish /.well-known/ii-openid-configuration."
+msgstr "{domainInput} isn't set up for SSO with Internet Identity. The domain owner needs to publish /.well-known/ii-openid-configuration."
 
-msgid "{domainInput}'s /.well-known/ii-openid-configuration is malformed: {0}"
-msgstr "{domainInput}'s /.well-known/ii-openid-configuration is malformed: {0}"
+msgid "{domainInput}'s SSO app doesn't allow the hybrid OAuth flow II requires. Ask the SSO admin to enable response_type \"id_token code\"."
+msgstr "{domainInput}'s SSO app doesn't allow the hybrid OAuth flow II requires. Ask the SSO admin to enable response_type \"id_token code\"."
 
-msgid "{domainInput}'s /.well-known/ii-openid-configuration is malformed."
-msgstr "{domainInput}'s /.well-known/ii-openid-configuration is malformed."
+msgid "{domainInput}'s SSO denied the sign-in. Try again, or check with your SSO admin."
+msgstr "{domainInput}'s SSO denied the sign-in. Try again, or check with your SSO admin."
+
+msgid "{domainInput}'s SSO returned error \"{0}\"."
+msgstr "{domainInput}'s SSO returned error \"{0}\"."
 
 msgid "{identityName} has been removed from this device."
 msgstr "{identityName} has been removed from this device."
@@ -240,6 +243,9 @@ msgstr "Continue with {name}"
 
 msgid "Continue with passkey"
 msgstr "Continue with passkey"
+
+msgid "Continue with SSO"
+msgstr "Continue with SSO"
 
 msgid "Couldn't reach {domainInput}. Check the spelling and your network, then try again."
 msgstr "Couldn't reach {domainInput}. Check the spelling and your network, then try again."
@@ -830,9 +836,6 @@ msgstr "Session timed out"
 msgid "Set as default sign-in"
 msgstr "Set as default sign-in"
 
-msgid "Several SSO sign-ins are in flight already. Wait a moment and try again."
-msgstr "Several SSO sign-ins are in flight already. Wait a moment and try again."
-
 msgid "Show all"
 msgstr "Show all"
 
@@ -850,9 +853,6 @@ msgstr "Sign in using familiar methods"
 
 msgid "Sign in with another identity"
 msgstr "Sign in with another identity"
-
-msgid "Sign in with SSO"
-msgstr "Sign in with SSO"
 
 msgid "Sign In With SSO"
 msgstr "Sign In With SSO"
@@ -903,23 +903,8 @@ msgstr "Source code"
 msgid "SSO"
 msgstr "SSO"
 
-msgid "SSO is not available for \"{domainInput}\" yet. Ask an II admin to register this domain."
-msgstr "SSO is not available for \"{domainInput}\" yet. Ask an II admin to register this domain."
-
-msgid "SSO provider misconfigured: authorization endpoint is not HTTPS. ({msg})"
-msgstr "SSO provider misconfigured: authorization endpoint is not HTTPS. ({msg})"
-
-msgid "SSO provider misconfigured: authorization endpoint points to a different host than the issuer. ({msg})"
-msgstr "SSO provider misconfigured: authorization endpoint points to a different host than the issuer. ({msg})"
-
-msgid "SSO provider misconfigured: issuer doesn't match the configured hostname. ({msg})"
-msgstr "SSO provider misconfigured: issuer doesn't match the configured hostname. ({msg})"
-
-msgid "SSO provider misconfigured: issuer URL is not HTTPS. ({msg})"
-msgstr "SSO provider misconfigured: issuer URL is not HTTPS. ({msg})"
-
-msgid "SSO provider's discovery document is malformed: {msg}"
-msgstr "SSO provider's discovery document is malformed: {msg}"
+msgid "SSO is not available for \"{domainInput}\" yet."
+msgstr "SSO is not available for \"{domainInput}\" yet."
 
 msgid "SSO sign-in failed. Please try again."
 msgstr "SSO sign-in failed. Please try again."
@@ -1016,6 +1001,9 @@ msgstr "This may take a few seconds"
 
 msgid "This passkey is no longer associated with any identity."
 msgstr "This passkey is no longer associated with any identity."
+
+msgid "This SSO domain is already linked to your identity."
+msgstr "This SSO domain is already linked to your identity."
 
 msgid "This YubiKey has older firmware (5.1) that's incompatible."
 msgstr "This YubiKey has older firmware (5.1) that's incompatible."

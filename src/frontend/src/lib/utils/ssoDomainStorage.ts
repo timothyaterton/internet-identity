@@ -23,20 +23,37 @@ const STORAGE_KEY = "ii:sso-domain-by-credential";
 
 type CredentialKey = { iss: string; sub: string; aud: string };
 
+interface SsoEntry {
+  domain: string;
+  orgName?: string;
+}
+
 const keyFor = ({ iss, sub, aud }: CredentialKey): string =>
   `${iss}|${sub}|${aud}`;
 
 /** Read the full map from localStorage. Returns an empty object on any
- * parse / access failure so the caller can treat "not found" uniformly. */
-const readAll = (): Record<string, string> => {
+ * parse / access failure so the caller can treat "not found" uniformly.
+ * Handles both old (plain string) and new (JSON object) value formats. */
+const readAll = (): Record<string, SsoEntry> => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw === null) return {};
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return {};
-    const out: Record<string, string> = {};
+    const out: Record<string, SsoEntry> = {};
     for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
-      if (typeof v === "string") out[k] = v;
+      if (typeof v === "string") {
+        out[k] = { domain: v };
+      } else if (typeof v === "object" && v !== null && "domain" in v) {
+        const entry = v as Record<string, unknown>;
+        if (typeof entry.domain === "string") {
+          out[k] = {
+            domain: entry.domain,
+            orgName:
+              typeof entry.orgName === "string" ? entry.orgName : undefined,
+          };
+        }
+      }
     }
     return out;
   } catch {
@@ -44,7 +61,7 @@ const readAll = (): Record<string, string> => {
   }
 };
 
-const writeAll = (map: Record<string, string>): void => {
+const writeAll = (map: Record<string, SsoEntry>): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
   } catch {
@@ -57,9 +74,10 @@ const writeAll = (map: Record<string, string>): void => {
 export const rememberSsoDomainForCredential = (
   credential: CredentialKey,
   domain: string,
+  orgName?: string,
 ): void => {
   const map = readAll();
-  map[keyFor(credential)] = domain;
+  map[keyFor(credential)] = { domain, orgName };
   writeAll(map);
 };
 
@@ -68,7 +86,7 @@ export const rememberSsoDomainForCredential = (
  * the mapping has been cleared. */
 export const lookupSsoDomainForCredential = (
   credential: CredentialKey,
-): string | undefined => readAll()[keyFor(credential)];
+): SsoEntry | undefined => readAll()[keyFor(credential)];
 
 /** Forget the mapping for a specific credential (e.g. on unlink). Safe to
  * call even if no entry exists. */

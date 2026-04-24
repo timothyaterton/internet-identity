@@ -25,13 +25,16 @@ msgstr "{application} se ha trasladado al nuevo Internet Identity"
 msgid "{displayName} account"
 msgstr ""
 
-msgid "{domainInput} didn't serve /.well-known/ii-openid-configuration (HTTP {0}). The domain owner needs to publish it for II to sign you in."
+msgid "{domainInput} isn't set up for SSO with Internet Identity. The domain owner needs to publish /.well-known/ii-openid-configuration."
 msgstr ""
 
-msgid "{domainInput}'s /.well-known/ii-openid-configuration is malformed: {0}"
+msgid "{domainInput}'s SSO app doesn't allow the hybrid OAuth flow II requires. Ask the SSO admin to enable response_type \"id_token code\"."
 msgstr ""
 
-msgid "{domainInput}'s /.well-known/ii-openid-configuration is malformed."
+msgid "{domainInput}'s SSO denied the sign-in. Try again, or check with your SSO admin."
+msgstr ""
+
+msgid "{domainInput}'s SSO returned error \"{0}\"."
 msgstr ""
 
 msgid "{identityName} has been removed from this device."
@@ -240,6 +243,9 @@ msgstr "Continuar con {name}"
 
 msgid "Continue with passkey"
 msgstr "Continuar con passkey"
+
+msgid "Continue with SSO"
+msgstr ""
 
 msgid "Couldn't reach {domainInput}. Check the spelling and your network, then try again."
 msgstr ""
@@ -830,9 +836,6 @@ msgstr "La sesión ha expirado"
 msgid "Set as default sign-in"
 msgstr "Establecer como inicio de sesión predeterminado"
 
-msgid "Several SSO sign-ins are in flight already. Wait a moment and try again."
-msgstr ""
-
 msgid "Show all"
 msgstr "Mostrar todo"
 
@@ -850,9 +853,6 @@ msgstr "Inicia la sesión usando métodos conocidos"
 
 msgid "Sign in with another identity"
 msgstr "Iniciar sesión con otra identidad"
-
-msgid "Sign in with SSO"
-msgstr ""
 
 msgid "Sign In With SSO"
 msgstr ""
@@ -903,22 +903,7 @@ msgstr "Código fuente"
 msgid "SSO"
 msgstr ""
 
-msgid "SSO is not available for \"{domainInput}\" yet. Ask an II admin to register this domain."
-msgstr ""
-
-msgid "SSO provider misconfigured: authorization endpoint is not HTTPS. ({msg})"
-msgstr ""
-
-msgid "SSO provider misconfigured: authorization endpoint points to a different host than the issuer. ({msg})"
-msgstr ""
-
-msgid "SSO provider misconfigured: issuer doesn't match the configured hostname. ({msg})"
-msgstr ""
-
-msgid "SSO provider misconfigured: issuer URL is not HTTPS. ({msg})"
-msgstr ""
-
-msgid "SSO provider's discovery document is malformed: {msg}"
+msgid "SSO is not available for \"{domainInput}\" yet."
 msgstr ""
 
 msgid "SSO sign-in failed. Please try again."
@@ -1016,6 +1001,9 @@ msgstr "Esto puede tardar unos segundos"
 
 msgid "This passkey is no longer associated with any identity."
 msgstr "Esta passkey ya no está asociada a ninguna identidad."
+
+msgid "This SSO domain is already linked to your identity."
+msgstr ""
 
 msgid "This YubiKey has older firmware (5.1) that's incompatible."
 msgstr "Esta YubiKey tiene un firmware antiguo (5.1) que es incompatible."

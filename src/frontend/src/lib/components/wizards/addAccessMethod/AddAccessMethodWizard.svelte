@@ -100,6 +100,7 @@
   <SignInWithSso
     continueWithSso={handleContinueWithSso}
     goBack={addAccessMethodFlow.chooseMethod}
+    existingCredentials={openIdCredentials}
   />
 {/if}
 

@@ -65,6 +65,8 @@ export interface SsoDiscoveryResult {
    * provenance rather than by the underlying IdP's issuer.
    */
   domain: string;
+  /** Human-readable org name from `ii-openid-configuration`, if provided. */
+  orgName?: string;
   clientId: string;
   discovery: OidcDiscoveryDocument;
 }
@@ -73,6 +75,7 @@ export interface SsoDiscoveryResult {
 const IIOpenIdConfigurationSchema = z.object({
   client_id: z.string().min(1),
   openid_configuration: z.string().min(1),
+  name: z.string().optional(),
 });
 type IIOpenIdConfiguration = z.infer<typeof IIOpenIdConfigurationSchema>;
 
@@ -362,6 +365,7 @@ export const discoverSsoConfig = async (
     ) {
       return {
         domain: validatedDomain,
+        orgName: cachedIIConfig.config.name,
         clientId: cachedIIConfig.config.client_id,
         discovery: cachedProvider.document,
       };
@@ -379,6 +383,7 @@ export const discoverSsoConfig = async (
       if (cachedProvider !== undefined) {
         return {
           domain: validatedDomain,
+          orgName: cachedIIConfig.config.name,
           clientId: cachedIIConfig.config.client_id,
           discovery: cachedProvider.document,
         };
@@ -434,6 +439,7 @@ export const discoverSsoConfig = async (
     ) {
       return {
         domain: validatedDomain,
+        orgName: iiConfig.name,
         clientId: iiConfig.client_id,
         discovery: cachedProviderDoc.document,
       };
@@ -456,6 +462,7 @@ export const discoverSsoConfig = async (
 
     return {
       domain: validatedDomain,
+      orgName: iiConfig.name,
       clientId: iiConfig.client_id,
       discovery: providerDoc,
     };
